@@ -1,0 +1,63 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- dev
+
+resources:
+- repo: self
+
+variables:
+  dockerRegistryServiceConnection: 'bf314571-a50b-4a29-8d4d-6bcd92eacc0d'
+  imageRepository: 'api-cotabest-dev'
+  appName: 'api-cotabest-dev'
+  containerRegistry: 'interfood.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages: 
+- stage: Build
+  displayName: Build and push stage
+  jobs:      
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build image
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        command: 'build'
+        Dockerfile: $(dockerfilePath)
+        arguments: '--build-arg VTEX_APPKEY_PROD=$(VTEX_APPKEY_PROD) --build-arg VTEX_APPTOKEN_PROD=$(VTEX_APPTOKEN_PROD) --build-arg VTEX_ACCOUNT_PROD=$(VTEX_ACCOUNT_PROD) --build-arg VTEX_ENVIRONMENT_PROD=$(VTEX_ENVIRONMENT_PROD) --build-arg SALESCHANNEL_PROD=$(SALESCHANNEL_PROD) --build-arg NODE_ENV=$(NODE_ENV) --build-arg VTEX_APPKEY=$(VTEX_APPKEY) --build-arg VTEX_APPTOKEN=$(VTEX_APPTOKEN) --build-arg VTEX_TOKEN=$(VTEX_TOKEN) --build-arg VTEX_ACCOUNT=$(VTEX_ACCOUNT) --build-arg VTEX_ENVIRONMENT=$(VTEX_ENVIRONMENT) --build-arg VTEX_URL=$(VTEX_URL) --build-arg VTEX_AUTH_URL=$(VTEX_AUTH_URL) --build-arg AN_AFFILIATE=$(AN_AFFILIATE) --build-arg AN_BASE=$(AN_BASE) --build-arg SALESCHANNEL=$(SALESCHANNEL) --build-arg WAREHOUSE_ID=$(WAREHOUSE_ID) --build-arg BD_USER=$(BD_USER) --build-arg BD_PASSWORD=$(BD_PASSWORD) --build-arg BD_DATABASE=$(BD_DATABASE) --build-arg BD_SERVER=$(BD_SERVER) --build-arg TOKEN_API=$(TOKEN_API) --build-arg REFRESH_TOKEN=$(REFRESH_TOKEN) --build-arg ACCESS_TOKEN=$(ACCESS_TOKEN) --build-arg COTABEST_BASE_URL=$(COTABEST_BASE_URL) --build-arg URL_RESPONSE=$(URL_RESPONSE) --build-arg LOCAL_TOKEN=$(LOCAL_TOKEN) --build-arg WEBHOOK_TOKEN=$(WEBHOOK_TOKEN) --build-arg CONNECTOR_NAME=$(CONNECTOR_NAME) --build-arg CONNECTOR_ENDPOINT=$(CONNECTOR_ENDPOINT)'
+        tags: '$(tag)'
+
+    - task: Docker@2
+      displayName: Push
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: '$(imageRepository)'
+        Tags: $(tag)
+        command: 'push'
+
+- stage: Deploy
+  dependsOn: Build
+  displayName: Deploy docker to WebApp
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureWebAppContainer@1
+      displayName: 'Azure Web App on Container Deploy'
+      inputs:
+        azureSubscription: 'Service Connection Azure Subs 1'
+        appName: $(appName)
+        imageName: $(containerRegistry)/$(imageRepository):$(tag)

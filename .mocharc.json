@@ -1,0 +1,9 @@
+{
+    "extensions": ["ts"],
+    "spec": ["src/tests/**/*.spec.ts"],
+    "exit": true,
+    "node-option": [
+      "es-module-specifier-resolution=node",
+      "loader=ts-node/esm"
+    ]
+}
