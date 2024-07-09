@@ -1,8 +1,8 @@
 import sinon from "sinon";
 import { expect } from "chai";
 
-import Log from "../../utils/log";
-import VtexService from "../../services/vtex";
+import Log from "../../src/utils/log";
+import VtexService from "../../src/services/vtex";
 import axios from "axios";
 import { orderFormId, orderItemsParsed, vtexResponse, vtexResponseError } from "./data/vtex";
 

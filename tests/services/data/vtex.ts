@@ -1,4 +1,4 @@
-import { IOrderItem, IOrderItems } from "../../../interfaces/carts";
+import { IOrderItem, IOrderItems } from "../../../src/interfaces/carts";
 
 export const vtexResponse = {
     data: {

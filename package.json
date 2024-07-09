@@ -1,7 +1,7 @@
 {
-  "name": "app-bff",
+  "name": "node-template-swagger",
   "version": "1.0.0",
-  "description": "App focado a ter responsabilidades de backend para o App Todovino (BFF)",
+  "description": "Node template with swagger",
   "author": "",
   "license": "ISC",
   "scripts": {
