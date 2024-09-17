@@ -3,7 +3,6 @@ import { join } from 'path';
 import winston from 'winston';
 import winstonDaily from 'winston-daily-rotate-file';
 import { LOG_DIR } from '../config';
-import transportLogToDB from './loggerTransport';
 
 // logs dir
 const logDir: string = join(__dirname, LOG_DIR);
@@ -49,7 +48,7 @@ const logger = winston.createLogger({
       json: false,
       zippedArchive: true,
     }),
-    transportLogToDB({ level: 'info' }),
+    // transportLogToDB({ level: 'info' }),
   ],
 });
 

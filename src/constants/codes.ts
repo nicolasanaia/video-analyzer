@@ -1,7 +1,3 @@
-export const SQL_CODES = {
-    DUPLICATE: 1062,
-}
-
 export const HTTP_STATUS = {
     SUCCESS: 200,
     MULTIPLE_CHOICES: 300,

@@ -12,7 +12,7 @@ import path from "path";
 import { useExpressServer, getMetadataArgsStorage } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
 import swaggerUi from 'swagger-ui-express';
-import { NODE_ENV, PORT, ORIGIN, CREDENTIALS } from './config';
+import { NODE_ENV, PORT, ORIGIN } from './config';
 import { logger } from './utils/loggerConfig';
 
 class App {
@@ -58,7 +58,7 @@ class App {
     useExpressServer(this.app, {
       cors: {
         origin: ORIGIN,
-        credentials: CREDENTIALS,
+        credentials: true,
       },
       controllers: this.controllers,
       defaultErrorHandler: false,
