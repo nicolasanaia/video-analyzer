@@ -92,8 +92,8 @@ class App {
       },
 
       info: {
-        description: 'App focado a ter responsabilidades de backend para o App Todovino (BFF)',
-        title: 'Micro Serviço Backend App Todovino (BFF)',
+        description: 'API to generate a MD file based on the video content',
+        title: 'Video Analyzer',
         version: '1.0.1',
       },
 

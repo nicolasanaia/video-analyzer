@@ -12,20 +12,14 @@
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
     "test": "mocha",
-    "test:cov": "nyc --check-coverage=true mocha --timeout 100000",
-    "migration:make": "knex migrate:make --knexfile src/knexfile.ts -x ts",
-    "dev:latest": "dotenv -e .env.development.local -- knex migrate:latest --knexfile src/knexfile.ts",
-    "dev:up": "dotenv -e .env.development.local -- knex migrate:up --knexfile src/knexfile.ts",
-    "dev:rollback": "dotenv -e .env.development.local -- knex migrate:rollback --knexfile src/knexfile.ts",
-    "prod:latest": "dotenv -e .env.production.local -- knex migrate:latest --knexfile src/knexfile.js",
-    "prod:up": "dotenv -e .env.production.local -- knex migrate:up --knexfile src/knexfile.js",
-    "prod:rollback": "dotenv -e .env.production.local -- knex migrate:rollback --knexfile src/knexfile.js"
+    "test:cov": "nyc --check-coverage=true mocha --timeout 100000"
   },
   "overrides": {
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2"
   },
   "dependencies": {
+    "@google-cloud/speech": "^6.7.0",
     "@types/request": "^2.48.8",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
@@ -39,6 +33,8 @@
     "dotenv-cli": "^7.3.0",
     "envalid": "^7.3.1",
     "express": "^4.18.1",
+    "ffmpeg": "^0.0.4",
+    "fluent-ffmpeg": "^2.1.3",
     "form-data": "^4.0.0",
     "handlebars": "^4.7.7",
     "helmet": "^5.1.1",
@@ -51,6 +47,7 @@
     "node-cron": "^3.0.2",
     "node-fetch": "^3.2.10",
     "node-schedule": "^2.1.1",
+    "openai": "^4.63.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
     "routing-controllers": "^0.9.0",
@@ -60,7 +57,9 @@
     "uuid": "^9.0.0",
     "winston": "^3.8.1",
     "winston-daily-rotate-file": "^4.7.1",
-    "winston-transport": "^4.5.0"
+    "winston-transport": "^4.5.0",
+    "youtube-dl-exec": "^3.0.9",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@swc/cli": "^0.1.57",
@@ -72,6 +71,7 @@
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
+    "@types/fluent-ffmpeg": "^2.1.26",
     "@types/hpp": "^0.2.2",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/lodash": "^4.14.198",

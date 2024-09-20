@@ -1,11 +1,16 @@
 export class ApiResponse<T> {
-    error: boolean;
+    error: boolean = false;
     message: string;
     body?: T;
 
-    constructor(error: boolean, message: string, body?: T) {
-        this.error = error;
+    constructor(message: string, body?: T) {
         this.message = message;
         this.body = body;
+    }
+}
+
+export class ApiResponseError<T> extends ApiResponse<T> {
+    constructor(message: string, body?: T) {
+        super(message, body);
     }
 }

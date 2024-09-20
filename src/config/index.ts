@@ -6,4 +6,5 @@ export const {
   ORIGIN,
   LOG_DIR,
   PORT,
+  OPENAI_API_KEY,
 } = process.env;
