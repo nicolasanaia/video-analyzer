@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import { OpenAI } from 'openai';
 import { OPENAI_API_KEY } from '@/config';
 import { exec } from 'youtube-dl-exec';
+import { LANGUAGES } from '@/constants/languages';
 
 export class VideoAnalyzerService {
   private openai: OpenAI;
@@ -49,16 +50,18 @@ export class VideoAnalyzerService {
     }
   }
 
-  async summarizeTranscription(transcription: string): Promise<string> {
+  async summarizeTranscription(transcription: string, language?: string): Promise<string> {
     try {
-      console.log('\n\nSummarizing transcription...');
+      console.log('\n\nSummarizing transcription in ...');
 
       const summary = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'user',
-            content: `Summarize the following text in detailed topics in Markdown format. Create a main title that reflects the text's context and include relevant subheadings. Highlight key points and themes clearly, using bullet points or numbered lists. Incorporate notable quotes or phrases from the text for added emphasis, while maintaining a neutral tone and avoiding a narrative style:\n\n
+            content: `Summarize the following text in detailed topics in Markdown format in the language ${ language ? LANGUAGES[language] : LANGUAGES.en }.
+              Create a main title that reflects the text's context and include relevant subheadings. Highlight key points and themes clearly, using bullet points or numbered lists.
+              Maintain a neutral tone and avoiding a narrative style:\n\n
               ${transcription}`,
           },
         ],
@@ -71,8 +74,9 @@ export class VideoAnalyzerService {
     }
   }
 
-  async analyzeVideo(url: string): Promise<string> {
+  async analyzeVideo(path: string, language?: string): Promise<string> {
     try {
+      const url = `https://www.youtube.com/watch?v=${path}`;
       console.log(`Analyzing video from ${url}`);
       
       await this.getAudio(url);
@@ -81,7 +85,7 @@ export class VideoAnalyzerService {
       console.log('\nTranscription result:\n', transcription);
       fs.unlinkSync(this.tempFile);
 
-      const summary = await this.summarizeTranscription(transcription);
+      const summary = await this.summarizeTranscription(transcription, language);
       console.log('Summary result:\n', summary);
 
       return summary;
