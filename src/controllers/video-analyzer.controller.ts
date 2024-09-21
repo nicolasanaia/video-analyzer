@@ -1,6 +1,6 @@
 import { ApiResponse, ApiResponseError } from "@/models/response";
 import { VideoAnalyzerService } from "@/services/video-analyzer.service";
-import { Controller, Get, Param, Params } from "routing-controllers";
+import { Controller, Get, Param, QueryParam } from "routing-controllers";
 
 @Controller('/video')
 export class VideoAnalyzerController {
@@ -10,8 +10,8 @@ export class VideoAnalyzerController {
     this.videoAnalyzerService = new VideoAnalyzerService();
   }
 
-  @Get('/:path/:language')
-  async analyzeVideo(@Param('path') path: string, @Param('language') language?: string): Promise<ApiResponse<any>> {
+  @Get('/:path')
+  async analyzeVideo(@Param('path') path: string, @QueryParam('language') language?: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.videoAnalyzerService.analyzeVideo(path, language);
 

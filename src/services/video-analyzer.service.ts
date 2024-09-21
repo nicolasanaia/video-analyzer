@@ -3,6 +3,7 @@ import { OpenAI } from 'openai';
 import { OPENAI_API_KEY } from '@/config';
 import { exec } from 'youtube-dl-exec';
 import { LANGUAGES } from '@/constants/languages';
+import { spawn } from 'child_process';
 
 export class VideoAnalyzerService {
   private openai: OpenAI;
@@ -34,20 +35,50 @@ export class VideoAnalyzerService {
     }
   }
 
-  async transcribeWithWhisper(): Promise<string> {
-    try {
-      console.log('Transcribing audio with Whisper...');
+  // async transcribeWithWhisperApi(): Promise<string> {
+  //   try {
+  //     console.log('Transcribing audio with Whisper...');
 
-      const transcription = await this.openai.audio.transcriptions.create({
-        file: fs.createReadStream(this.tempFile),
-        model: 'whisper-1',
+  //     const transcription = await this.openai.audio.transcriptions.create({
+  //       file: fs.createReadStream(this.tempFile),
+  //       model: 'whisper-1',
+  //     });
+
+  //     return transcription.text;
+  //   } catch (error) {
+  //     console.error(`Error transcribing with Whisper\n`, error);
+  //     throw new Error('Error transcribing with Whisper');
+  //   }
+  // }
+
+  async transcribeWithWhisper(): Promise<any> {	
+    return new Promise((resolve, reject) => {
+      const pythonProcess = spawn('python3', ['./src/scripts/whisper_transcribe.py']);
+
+      let scriptOutput = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        scriptOutput += data.toString();
       });
 
-      return transcription.text;
-    } catch (error) {
-      console.error(`Error transcribing with Whisper\n`, error);
-      throw new Error('Error transcribing with Whisper');
-    }
+      pythonProcess.stderr.on('data', (data) => {
+        reject(new Error(data.toString()));
+      });
+
+      pythonProcess.on('close', (code) => {
+        if (code === 0) {
+          try {
+            console.log('Transcription result:\n', scriptOutput);
+            const output = JSON.parse(scriptOutput);
+            resolve(output.text);
+          } catch (parseError) {
+            reject(new Error('Failed to parse Python script output'));
+          }
+        } else {
+          reject(new Error(`Python script exited with code ${code}`));
+        }
+      });
+    });  
   }
 
   async summarizeTranscription(transcription: string, language?: string): Promise<string> {
@@ -74,7 +105,7 @@ export class VideoAnalyzerService {
     }
   }
 
-  async analyzeVideo(path: string, language?: string): Promise<string> {
+  async analyzeVideo(path: string, language?: string): Promise<any> {
     try {
       const url = `https://www.youtube.com/watch?v=${path}`;
       console.log(`Analyzing video from ${url}`);
