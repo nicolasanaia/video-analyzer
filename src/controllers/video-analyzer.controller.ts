@@ -1,4 +1,4 @@
-import { ApiResponse, ApiResponseError } from "@/models/response";
+import { ApiInternalServerError, ApiResponse, ApiResponseError } from "@/models/response";
 import { VideoAnalyzerService } from "@/services/video-analyzer.service";
 import { Controller, Get, Param, QueryParam } from "routing-controllers";
 
@@ -17,7 +17,7 @@ export class VideoAnalyzerController {
 
       return new ApiResponse('Video analysis completed', response);
     } catch (error) {
-      return new ApiResponseError(error.message);
+      throw new ApiResponseError(error.message, error.code, error.body);
     }    
   }
-}
+};

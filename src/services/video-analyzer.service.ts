@@ -4,14 +4,15 @@ import { OPENAI_API_KEY } from '@/config';
 import { exec } from 'youtube-dl-exec';
 import { LANGUAGES } from '@/constants/languages';
 import { spawn } from 'child_process';
+import { AUDIO_TEMP_FILE, PYTHON_WHISPER_SCRIPT } from '@/constants/paths';
+import { ApiInternalServerError } from '@/models/response';
+import { CHAT_GPT_MODEL, CHAT_GPT_PROMPT, CHAT_GPT_ROLE, YOUTUBE_BASE_URL } from '@/constants/api';
 
 export class VideoAnalyzerService {
   private openai: OpenAI;
-  private readonly tempFile: string;
 
   constructor() {
     this.openai = new OpenAI({ apiKey: OPENAI_API_KEY});
-    this.tempFile = 'temp_audio.mp3';
   }
 
   async getAudio(url: string): Promise<void> {
@@ -21,16 +22,12 @@ export class VideoAnalyzerService {
       await exec(url, {
         extractAudio: true,
         audioFormat: 'mp3',
-        output: this.tempFile,
-      })
-        .then(output => {
-          console.log('Audio downloaded successfully!');
-        })
-        .catch(err => {
-          console.error('Error downloading audio', err);
-        });
+        output: AUDIO_TEMP_FILE,
+      });
+
+      console.log('Audio downloaded successfully');
     } catch (error) {
-      console.log(`Error getting audio from video: ${error.message}`);
+      console.log(`Error getting audio from video`);
       throw new Error('Error getting audio from video');
     }
   }
@@ -40,7 +37,7 @@ export class VideoAnalyzerService {
   //     console.log('Transcribing audio with Whisper...');
 
   //     const transcription = await this.openai.audio.transcriptions.create({
-  //       file: fs.createReadStream(this.tempFile),
+  //       file: fs.createReadStream(AUDIO_TEMP_FILE),
   //       model: 'whisper-1',
   //     });
 
@@ -53,7 +50,7 @@ export class VideoAnalyzerService {
 
   async transcribeWithWhisper(): Promise<any> {	
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn('python3', ['./src/scripts/whisper_transcribe.py']);
+      const pythonProcess = spawn('python3', [PYTHON_WHISPER_SCRIPT]);
 
       let scriptOutput = '';
 
@@ -86,14 +83,11 @@ export class VideoAnalyzerService {
       console.log('\n\nSummarizing transcription in ...');
 
       const summary = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: CHAT_GPT_MODEL,
         messages: [
           {
-            role: 'user',
-            content: `Summarize the following text in detailed topics in Markdown format in the language ${ language ? LANGUAGES[language] : LANGUAGES.en }.
-              Create a main title that reflects the text's context and include relevant subheadings. Highlight key points and themes clearly, using bullet points or numbered lists.
-              Maintain a neutral tone and avoiding a narrative style:\n\n
-              ${transcription}`,
+            role: CHAT_GPT_ROLE,
+            content: await CHAT_GPT_PROMPT(language, transcription),
           },
         ],
       });
@@ -107,21 +101,22 @@ export class VideoAnalyzerService {
 
   async analyzeVideo(path: string, language?: string): Promise<any> {
     try {
-      const url = `https://www.youtube.com/watch?v=${path}`;
+      const url = `${YOUTUBE_BASE_URL}${path}`;
       console.log(`Analyzing video from ${url}`);
       
       await this.getAudio(url);
       
       const transcription = await this.transcribeWithWhisper();
       console.log('\nTranscription result:\n', transcription);
-      fs.unlinkSync(this.tempFile);
 
       const summary = await this.summarizeTranscription(transcription, language);
       console.log('Summary result:\n', summary);
+      fs.unlinkSync(AUDIO_TEMP_FILE);
 
       return summary;
     } catch (error) {
       console.error('Error analyzing video', error);
+      throw new ApiInternalServerError(error.message);
     }
   }
 }
