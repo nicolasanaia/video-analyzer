@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import { OpenAI } from 'openai';
 import { OPENAI_API_KEY } from '@/config';
 import { exec } from 'youtube-dl-exec';
-import { LANGUAGES } from '@/constants/languages';
 import { spawn } from 'child_process';
 import { AUDIO_TEMP_FILE, PYTHON_WHISPER_SCRIPT } from '@/constants/paths';
 import { ApiInternalServerError } from '@/models/response';
